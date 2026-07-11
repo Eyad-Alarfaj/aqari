@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { TrendingDistrict } from "@/lib/types";
+import { loadSnapshot } from "@/lib/snapshot";
 import { formatArea, formatNumber, formatSarCompact } from "@/lib/format";
 
 const PERIODS = [
@@ -14,26 +15,18 @@ type PeriodKey = (typeof PERIODS)[number]["key"];
 
 export default function TrendingDistricts() {
   const [period, setPeriod] = useState<PeriodKey>("W");
-  const [districts, setDistricts] = useState<TrendingDistrict[]>([]);
+  const [byPeriod, setByPeriod] = useState<Partial<Record<PeriodKey, TrendingDistrict[]>>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    fetch(`/api/trending?period=${period}`)
-      .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then((data: { districts: TrendingDistrict[] }) => {
-        if (cancelled) return;
-        setDistricts(data.districts);
-        setError(false);
-      })
-      .catch(() => !cancelled && setError(true))
-      .finally(() => !cancelled && setLoading(false));
-    return () => {
-      cancelled = true;
-    };
-  }, [period]);
+    loadSnapshot()
+      .then((snap) => setByPeriod(snap.trending))
+      .catch(() => setError(true))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const districts = byPeriod[period] ?? [];
 
   return (
     <section

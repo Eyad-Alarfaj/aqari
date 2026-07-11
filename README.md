@@ -25,14 +25,20 @@ Recharts, and SignalR.
 
 ## Architecture decisions
 
-**Official data, no scraping.** All three data sources are anonymous public
-endpoints of the SREM platform (they appear in the app bundle's anonymous
-whitelist). REST calls are proxied through Next.js route handlers with
-server-side caching (60s for the index snapshot, 10min for history and
-trending) so any number of visitors produces a constant upstream load. The
-SignalR stream connects browser-to-source directly — deals are public data
-and proxying a WebSocket through a serverless platform would add cost and
-latency for nothing.
+**Two data paths, because the WAF forced it.** The live deals stream is a
+SignalR WebSocket that connects browser-to-source directly and works
+everywhere. The dashboard REST endpoints (index, history, trending) are a
+different story: SREM's WAF blocks Vercel's serverless egress IPs — both the
+Node runtime (AWS `iad1`) and the Edge runtime (Vercel PoPs) get a reset or a
+tarpit, even with browser-like headers. The same requests succeed from a
+residential or GitHub-runner IP.
+
+Since that data changes daily at most, it doesn't need a runtime fetch. A
+GitHub Action (`.github/workflows/snapshot.yml`) runs `scripts/build-snapshot.mjs`
+every 6 hours from an allowed network, writes `public/snapshot.json`, and
+commits it — which triggers a Vercel redeploy with fresh data. The client
+reads that one static file, so the index and trending sections are always
+available and never depend on a blocked request. Live deals stay real-time.
 
 **Defensive stream parsing.** The deals stream schema is undocumented, so
 fields are located by key pattern (`/price|amount/i`, `/district/i`, …)
@@ -72,21 +78,21 @@ Open http://localhost:3000. No API keys — the endpoints are public.
 ## Project structure
 
 ```
-src/
-├── app/
-│   ├── page.tsx                  # Dashboard (single page)
-│   └── api/
-│       ├── market/route.ts       # Index snapshot, 60s cache
-│       ├── index-history/route.ts# Daily index history, 10min cache
-│       └── trending/route.ts     # Trending districts, 10min cache
-├── components/
-│   ├── IndexSection.tsx          # Hero number + area chart + range tabs
-│   ├── LiveDeals.tsx             # SignalR live deals feed
-│   ├── TrendingDistricts.tsx     # Ranked district list + period tabs
-│   └── Header.tsx
-└── lib/
-    ├── format.ts                 # SAR/area/date formatting (Arabic, latn digits)
-    └── types.ts
+├── .github/workflows/snapshot.yml # Cron job: refresh public/snapshot.json
+├── scripts/build-snapshot.mjs     # Fetches SREM dashboard data → snapshot
+├── public/snapshot.json           # Index + history + trending (committed)
+└── src/
+    ├── app/
+    │   └── page.tsx               # Dashboard (single page)
+    ├── components/
+    │   ├── IndexSection.tsx       # Hero number + area chart + range tabs
+    │   ├── LiveDeals.tsx          # SignalR live deals feed
+    │   ├── TrendingDistricts.tsx  # Ranked district list + period tabs
+    │   └── Header.tsx
+    └── lib/
+        ├── snapshot.ts            # Loads + caches public/snapshot.json
+        ├── format.ts              # SAR/area/date formatting (Arabic, latn digits)
+        └── types.ts
 ```
 
 ## Roadmap

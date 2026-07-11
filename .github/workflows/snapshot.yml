@@ -1,0 +1,35 @@
+name: Refresh SREM snapshot
+
+# The SREM WAF blocks Vercel's egress IPs, so the dashboard data can't be
+# fetched at runtime. This job fetches it from a GitHub runner (an allowed
+# network) on a schedule and commits public/snapshot.json; committing to the
+# Vercel-connected repo triggers a redeploy with fresh data.
+on:
+  schedule:
+    - cron: "0 */6 * * *" # every 6 hours
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: node scripts/build-snapshot.mjs
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet public/snapshot.json; then
+            git add public/snapshot.json
+            git commit -m "chore: refresh SREM snapshot [skip ci]"
+            git push
+          else
+            echo "snapshot unchanged"
+          fi

@@ -11,13 +11,13 @@ import {
   YAxis,
 } from "recharts";
 import type { IndexPoint, MarketSnapshot } from "@/lib/types";
+import { loadSnapshot } from "@/lib/snapshot";
 import { formatDate, formatNumber, formatSarCompact } from "@/lib/format";
 
 const CATEGORIES = [
   { key: "W", label: "أسبوع" },
   { key: "M", label: "شهر" },
   { key: "Y", label: "سنة" },
-  { key: "All", label: "الكل" },
 ] as const;
 
 type CategoryKey = (typeof CATEGORIES)[number]["key"];
@@ -48,29 +48,22 @@ function ChartTooltip({
 
 export default function IndexSection() {
   const [category, setCategory] = useState<CategoryKey>("M");
-  const [points, setPoints] = useState<IndexPoint[]>([]);
+  const [history, setHistory] = useState<Partial<Record<CategoryKey, IndexPoint[]>>>({});
   const [snapshot, setSnapshot] = useState<MarketSnapshot | null>(null);
+  const [generatedAt, setGeneratedAt] = useState<string | null>(null);
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    fetch("/api/market")
-      .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then(setSnapshot)
+    loadSnapshot()
+      .then((snap) => {
+        setSnapshot(snap.market);
+        setHistory(snap.history);
+        setGeneratedAt(snap.generatedAt);
+      })
       .catch(() => setError(true));
   }, []);
 
-  useEffect(() => {
-    let cancelled = false;
-    fetch(`/api/index-history?category=${category}`)
-      .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then((data: { points: IndexPoint[] }) => {
-        if (!cancelled) setPoints(data.points);
-      })
-      .catch(() => setError(true));
-    return () => {
-      cancelled = true;
-    };
-  }, [category]);
+  const points = history[category] ?? [];
 
   const latest = points.at(-1);
   // Today's point reports indexChange 0 while the day is still
@@ -102,6 +95,18 @@ export default function IndexSection() {
           {latest && (
             <p className="tnum mt-1 text-sm text-ink-muted">
               قيمة السوق الإجمالية: {formatSarCompact(latest.marketValue)}
+            </p>
+          )}
+          {generatedAt && (
+            <p className="mt-1 text-xs text-ink-faint">
+              محدَّث{" "}
+              {new Date(generatedAt).toLocaleDateString("ar", {
+                day: "numeric",
+                month: "long",
+                hour: "numeric",
+                minute: "2-digit",
+                numberingSystem: "latn",
+              })}
             </p>
           )}
         </div>
