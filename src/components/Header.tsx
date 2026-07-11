@@ -14,14 +14,24 @@ export default function Header() {
             <p className="text-xs text-ink-faint leading-tight">نبض سوق العقار السعودي</p>
           </div>
         </div>
-        <a
-          href="https://srem.moj.gov.sa"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="rounded-full border border-line bg-surface-2 px-3 py-1 text-xs text-ink-muted transition-colors hover:text-ink"
-        >
-          المصدر: البورصة العقارية — وزارة العدل
-        </a>
+        <nav className="flex items-center gap-2">
+          <a
+            href="https://srem.moj.gov.sa"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-full border border-line bg-surface-2 px-3 py-1 text-xs text-ink-muted transition-colors hover:text-ink"
+          >
+            المصدر: البورصة العقارية — وزارة العدل
+          </a>
+          <a
+            href="https://github.com/Commando-Xxt/aqari"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-full border border-line bg-surface-2 px-3 py-1 text-xs text-ink-muted transition-colors hover:text-ink"
+          >
+            GitHub
+          </a>
+        </nav>
       </div>
     </header>
   );
