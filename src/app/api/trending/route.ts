@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SREM, SREM_HEADERS } from "@/lib/srem";
 
+// Edge runtime so the request egresses from Vercel's edge network rather
+// than AWS us-east, whose IPs the SREM WAF blocks.
+export const runtime = "edge";
+
 const ALLOWED = new Set(["D", "W", "M", "Y"]);
 
 // Most-traded districts across Saudi Arabia for the given period.

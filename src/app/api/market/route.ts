@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { SREM, SREM_HEADERS } from "@/lib/srem";
 
+// Edge runtime: Vercel's default Node functions run in AWS us-east (iad1),
+// whose IPs the SREM WAF blocks. The edge network egresses from a
+// non-AWS PoP that the WAF accepts.
+export const runtime = "edge";
+
 // Current market index snapshot. Short cache so the hero number
 // feels live without hammering the upstream.
 export async function GET() {
