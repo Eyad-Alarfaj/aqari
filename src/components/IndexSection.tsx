@@ -22,9 +22,9 @@ const CATEGORIES = [
 
 type CategoryKey = (typeof CATEGORIES)[number]["key"];
 
-const INK_MUTED = "#5c675f";
-const GRID = "#eeece4";
-const GREEN = "#136f4a";
+const INK_MUTED = "#9fb5d1";
+const GRID = "#22324a";
+const SERIES = "#d9b45f";
 
 function ChartTooltip({
   active,
@@ -147,8 +147,8 @@ export default function IndexSection() {
               <AreaChart data={points} margin={{ top: 4, right: 4, bottom: 0, left: 4 }}>
                 <defs>
                   <linearGradient id="index-fill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={GREEN} stopOpacity={0.14} />
-                    <stop offset="100%" stopColor={GREEN} stopOpacity={0} />
+                    <stop offset="0%" stopColor={SERIES} stopOpacity={0.14} />
+                    <stop offset="100%" stopColor={SERIES} stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid stroke={GRID} vertical={false} />
@@ -177,7 +177,7 @@ export default function IndexSection() {
                 <Area
                   type="monotone"
                   dataKey="index"
-                  stroke={GREEN}
+                  stroke={SERIES}
                   strokeWidth={2}
                   fill="url(#index-fill)"
                   dot={false}

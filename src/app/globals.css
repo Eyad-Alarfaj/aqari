@@ -1,20 +1,21 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg: #faf9f6;
-  --color-surface: #ffffff;
-  --color-surface-2: #f3f1ea;
-  --color-ink: #1d2521;
-  --color-ink-muted: #5c675f;
-  --color-ink-faint: #8b948c;
-  --color-line: #e7e4da;
-  --color-grid: #eeece4;
-  --color-primary: #136f4a;
-  --color-primary-hover: #0e5a3c;
-  --color-primary-soft: #e3f0e9;
-  --color-gold: #b98a2f;
-  --color-up: #158a4e;
-  --color-down: #c2412e;
+  /* ثيم برج (Terminal) — كحلي داكن، أرقام كريمية */
+  --color-bg: #0d1321;
+  --color-surface: #1a2740;
+  --color-surface-2: #24344d;
+  --color-ink: #f0ebd8;
+  --color-ink-muted: #9fb5d1;
+  --color-ink-faint: #6d84a3;
+  --color-line: #2c3f5a;
+  --color-grid: #22324a;
+  --color-primary: #4a7ab5;
+  --color-primary-hover: #5c8ac2;
+  --color-primary-soft: #1e3149;
+  --color-gold: #d9b45f;
+  --color-up: #3ecf8e;
+  --color-down: #f0644a;
 
   --font-arabic: var(--font-plex-arabic);
 }
