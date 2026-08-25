@@ -98,6 +98,8 @@ async function main() {
 }
 
 main().catch((e) => {
-  console.error("snapshot failed:", e.message);
+  // `fetch failed` alone is opaque; the cause carries the socket-level reason
+  // (timeout / reset), which is how an upstream IP block shows up here.
+  console.error("snapshot failed:", e.message, e.cause?.message ?? "");
   process.exit(1);
 });
