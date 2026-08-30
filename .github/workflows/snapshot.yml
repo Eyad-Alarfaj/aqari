@@ -1,5 +1,11 @@
 name: Refresh SREM snapshot
 
+# DISABLED (2026-08-31). SREM now blocks GitHub Actions egress too, so every
+# scheduled run here ended in `fetch failed` and the snapshot went stale for
+# weeks. The refresh moved to scripts/refresh-snapshot.sh, driven by a local
+# Windows scheduled task ("Aqari SREM Snapshot") on an allowed network. Kept
+# for reference: re-enable only if the upstream stops blocking these runners.
+
 # The SREM WAF blocks Vercel's egress IPs, so the dashboard data can't be
 # fetched at runtime. This job fetches it from a GitHub runner (an allowed
 # network) on a schedule and commits public/snapshot.json; committing to the
